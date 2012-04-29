@@ -3,70 +3,61 @@ var Twitter= require('ntwitter')
   , conf = require('./conf');
 
 var twitter = new Twitter({
-	consumer_key: conf.twit.consumer_key,
-	consumer_secret: conf.twit.consumer_secret,
-	access_token_key: conf.twit.access_token_key,
-	access_token_secret: conf.twit.access_token_secret
+  consumer_key: conf.twit.consumer_key,
+  consumer_secret: conf.twit.consumer_secret,
+  access_token_key: conf.twit.access_token_key,
+  access_token_secret: conf.twit.access_token_secret
 });
 
-//var params = { geocode: '42.40115,-82.931671,60mi', rpp: 100};
-var params = {}
+// login to twitter
 twitter.verifyCredentials(function (err, data) {
-	if (err) {
-		console.err("auth failure", err);
-		process.exit(1);
-	}
-	console.log("auth success");
-	//setInterval(search, 5000);
-	twitStream();
-}); // end verify
+  if (err) {
+    console.err("auth failure", err);
+    process.exit(1);
+  }
+  console.log("auth success...waiting for tweets...");
+  // bounding box around my vet's area
+  var params = {locations:'-82.983731,42.340229,-82.81825,42.504963'}
+  twitStream(params);
+}); 
 
-function twitStream() {
-	twitter.stream(
+
+// live stream tweets
+function twitStream(params) {
+  twitter.stream(
     'statuses/filter',
-    { track: ['awesome', 'cool', 'rad', 'gnarly', 'groovy'] },
-    function(stream) {
-        stream.on('data', function(tweet) {
-            console.log(tweet.text);
-        });
+	params,
+	function(stream) {
+	  stream.on('data', function(tweet) {
+	    //console.dir(tweet);
+	    //can't combine twitter stream + search so use regex to filter
+	    if(tweet.text.match(/vet|veterinarian|veterinary|dog|cat/)) {
+	      persist(tweet);
+	    }
+	  });
     }
-);
+  );
 }
 
-function search() {
-	twitter.search(conf.track, params, function (err, data) {
-		if (err) {
-			console.log(err);
-		} else {
-			console.dir(data);
-			data.results.forEach(persist);
-		} 
-	}); // end search
-}
 
 // persist a tweet to riak
 function persist(tweet) {
-
-	var key = tweet.id_str,
-	  tweetObj = {
-		  user: tweet.from_user,
-		  tweet: tweet.text,
-		  tweeted_at: new Date(tweet.created_at).toISOString(),
-      id_str: key
-	  },
-	  links = [];
-
-	console.log('saving tweet to riak', tweetObj);
-
-	if (tweet.in_reply_to_status_id_str) {
-		links.push({
-			tag: 'in_reply_to',
-			bucket: 'tweets',
-			key:tweet.in_reply_to_status_id_str
-		});
+  var key = tweet.id_str,
+    tweetObj = {
+      user: tweet.user.screen_name,
+      tweet: tweet.text,
+      tweeted_at: new Date(tweet.created_at).toISOString(),
+      id_str: key },
+	links = [];
+    console.log('saving tweet to riak', tweetObj);
+    if (tweet.in_reply_to_status_id_str) {
+    links.push({
+      tag: 'in_reply_to',
+      bucket: 'tweets',
+      key:tweet.in_reply_to_status_id_str});
 	}
 
-	riak.save('tweets', key, tweetObj, {links: links}, function (err) {
-		if (err) { console.err(err); }
-	});
+    riak.save('tweets', key, tweetObj, {links: links}, function (err) {
+      if (err) { console.err(err); }
+    });
 }
