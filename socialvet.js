@@ -55,7 +55,7 @@ function persist(tweet) {
       tag: 'in_reply_to',
       bucket: 'tweets',
       key:tweet.in_reply_to_status_id_str});
-	}
+    }
 
     riak.save('tweets', key, tweetObj, {links: links}, function (err) {
       if (err) { console.err(err); }

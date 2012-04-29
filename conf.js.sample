@@ -1,13 +1,8 @@
 module.exports = {
-	twit: {
-		consumer_key: "MY KEY HERE",
-		consumer_secret: "MY SECRET HERE",
-		access_token_key: "MY TOKEN HERE",
-		access_token_secret: "MY TOKEN SECRET HERE"
-	},
-	geocode: {
-		latitude: 42.418768,
-		longitude: -82.905064
-	},
-	track: 'veterinarian,vet,dog,cat'
+  twit: {
+    consumer_key: "KEY",
+    consumer_secret: "KEY",
+    access_token_key: "KEY",
+    access_token_secret: "KEY"
+  }
 }
