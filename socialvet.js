@@ -31,7 +31,7 @@ function twitStream(params) {
 	  stream.on('data', function(tweet) {
 	    //console.dir(tweet);
 	    //can't combine twitter stream + search so use regex to filter
-	    if(tweet.text.match(/vet|veterinarian|veterinary|dog|cat/)) {
+	    if(tweet.text.match(/vet|dog|cat/)) {
 	      persist(tweet);
 	    }
 	  });
