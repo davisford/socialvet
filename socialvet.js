@@ -1,6 +1,7 @@
 var Twitter= require('ntwitter')
-  , riak = require('riak-js').getClient()
-  , conf = require('./conf');
+  , conf = require('./conf')
+  , riak = require('riak-js').getClient({host:conf.connection.host, port:conf.connection.port});
+  
 
 var twitter = new Twitter({
   consumer_key: conf.twit.consumer_key,
@@ -58,6 +59,6 @@ function persist(tweet) {
     }
 
     riak.save('tweets', key, tweetObj, {links: links}, function (err) {
-      if (err) { console.err(err); }
+      if (typeof(err) !== "undefined" && err !== null) { console.log(err); }
     });
 }

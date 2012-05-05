@@ -4,5 +4,9 @@ module.exports = {
     consumer_secret: "KEY",
     access_token_key: "KEY",
     access_token_secret: "KEY"
+  },
+  connection: {
+  	host: "localhost",
+  	port: 8091
   }
 }
